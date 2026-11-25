@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h> 
 
@@ -18,8 +19,15 @@ void les_trois_meilleures_notes();
 void nombre_etudiants_reussi_departement();
 void rechercher_un_etudiant();
 void triage();
-void trier_etudtiant_fct_nom1();
-void trier_etudiant_fct_nom2();
+static void afficher_tri_par_nom(int descendant);
+
+static int comparer_sans_casse(const char *a, const char *b) {
+    while (*a && tolower((unsigned char)*a) == tolower((unsigned char)*b)) {
+        a++;
+        b++;
+    }
+    return tolower((unsigned char)*a) - tolower((unsigned char)*b);
+}
 
 
 typedef struct{
@@ -46,7 +54,7 @@ int main(){
    do{
     menu_principale();
     printf("\nEnter Votre choix: ");
-    scanf("%d",&reponse);
+    if (scanf("%d", &reponse) != 1) return 0;
 
     switch (reponse){
         case 1:
@@ -93,12 +101,15 @@ void menu_principale(){
 }
 
 void ajouter_un_etudiant(){
-        int jour, mois, annee;
+        if (nombre_etudiants >= MAX_ETUDIANTS) {
+            puts("Capacité maximale atteinte.");
+            return;
+        }
         etudiants[nombre_etudiants].id = nombre_etudiants + 1;
         printf("Nom: ");
-        scanf("%s", &etudiants[nombre_etudiants].nom);
+        scanf("%49s", etudiants[nombre_etudiants].nom);
         printf("Prenom: ");
-        scanf("%s", &etudiants[nombre_etudiants].prenom);
+        scanf("%49s", etudiants[nombre_etudiants].prenom);
         printf("Date de naissance: \n");
         do{
         printf("Jour: ");
@@ -114,7 +125,7 @@ void ajouter_un_etudiant(){
         }while(etudiants[nombre_etudiants].date_de_naissances.annee < 1900 || etudiants[nombre_etudiants].date_de_naissances.annee > 2022 );
         do{
         printf("Selectionner Votre departement (math - physique - chimie - informatique - biologie): ");
-        scanf("%s", &etudiants[nombre_etudiants].departement);
+        scanf("%19s", etudiants[nombre_etudiants].departement);
         }while(strcmp(etudiants[nombre_etudiants].departement , "math") != 0 && strcmp(etudiants[nombre_etudiants].departement , "physique") != 0 && strcmp(etudiants[nombre_etudiants].departement , "chimie") != 0 && strcmp(etudiants[nombre_etudiants].departement , "informatique") != 0 && strcmp(etudiants[nombre_etudiants].departement , "biologie") != 0);
         do{
         printf("Note Generale: ");
@@ -143,9 +154,9 @@ void modifier_ou_supprimer(){
          if(etudiants[i].id == id){
            verifier = 1;
            printf("Nom: ");
-           scanf("%s", &etudiants[id - 1].nom);
+           scanf("%49s", etudiants[id - 1].nom);
            printf("Prenom: ");
-           scanf("%s", &etudiants[id -1].prenom);
+           scanf("%49s", etudiants[id -1].prenom);
            printf("Date de naissance: \n");
            printf("Jour: ");
            scanf("%d", &etudiants[id - 1].date_de_naissances.jour);
@@ -154,7 +165,7 @@ void modifier_ou_supprimer(){
            printf("Annee: ");
            scanf("%d", &etudiants[id - 1].date_de_naissances.annee);
            printf("Selectionner Votre departement (math - physique - chimie - informatique - biologie - geologie): ");
-           scanf("%s", &etudiants[id - 1].departement);
+           scanf("%19s", etudiants[id - 1].departement);
            printf("Note Generale: ");
            scanf("%f", &etudiants[id - 1].note_generale);
            printf("\nEtudiant ajouter avec success\n");
@@ -237,9 +248,7 @@ void moyenne_generale(){
     float moyenne_biologie = 0;
     float finale = 0;
     float moyenne = 0;
-    for (int i = 0; i < nombre_etudiants; i++){
-        strcpy(etudiants[i].departement, strlwr(etudiants[i].departement));
-    }
+
    
     float finale1 = 0;
     float finale2 = 0;
@@ -248,27 +257,27 @@ void moyenne_generale(){
     float finale5 = 0;
 
     for (int i = 0; i < nombre_etudiants; i++){
-        if(strcmp(etudiants[i].departement, "math") == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "math") == 0){
                somme_math++;
             finale1 = finale1 + etudiants[i].note_generale;
             
           }
-        else if(strcmp(etudiants[i].departement, "physique")  == 0){
+        else if(comparer_sans_casse(etudiants[i].departement, "physique")  == 0){
                 somme_physique++;
             finale2 = finale2 + etudiants[i].note_generale;
             
           }
-        else if(strcmp(etudiants[i].departement, "chimie")  == 0){
+        else if(comparer_sans_casse(etudiants[i].departement, "chimie")  == 0){
                somme_chimie++;
             finale3 = finale3 + etudiants[i].note_generale;
             
           }
-        else if(strcmp(etudiants[i].departement, "informatique")  == 0){
+        else if(comparer_sans_casse(etudiants[i].departement, "informatique")  == 0){
                somme_info++;
             finale4 = finale4 + etudiants[i].note_generale;
             
           }
-        else if(strcmp(etudiants[i].departement, "biologie")  == 0){
+        else if(comparer_sans_casse(etudiants[i].departement, "biologie")  == 0){
                somme_biologie++;
             finale5 = finale5 + etudiants[i].note_generale;
             
@@ -370,19 +379,19 @@ void nombre_etudiant_dans_departement(){
     int nombre_geologie = 0;
     int choix;
     for (int i = 0; i < nombre_etudiants; i++){
-        if(strcmp(etudiants[i].departement, "math") == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "math") == 0){
             nombre_math++;
         }
-        if(strcmp(etudiants[i].departement, "physique")  == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "physique")  == 0){
             nombre_physique++;
         }
-        if(strcmp(etudiants[i].departement, "chimie")  == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "chimie")  == 0){
             nombre_chimie++;
         }
-        if(strcmp(etudiants[i].departement, "informatique")  == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "informatique")  == 0){
             nombre_info++;
         }
-        if(strcmp(etudiants[i].departement, "biologie")  == 0){
+        if(comparer_sans_casse(etudiants[i].departement, "biologie")  == 0){
             nombre_biologie++;
         }
     }
@@ -493,19 +502,19 @@ void nombre_etudiants_reussi_departement(){
     int nombre_biologie = 0;
     int choix;
     for (int i = 0; i < nombre_etudiants; i++){
-        if(strcmp(etudiants[i].departement, "math") == 0 && etudiants[i].note_generale >= 10){
+        if(comparer_sans_casse(etudiants[i].departement, "math") == 0 && etudiants[i].note_generale >= 10){
             nombre_math++;
         }
-        if(strcmp(etudiants[i].departement, "physique")  == 0 && etudiants[i].note_generale >= 10){
+        if(comparer_sans_casse(etudiants[i].departement, "physique")  == 0 && etudiants[i].note_generale >= 10){
             nombre_physique++;
         }
-        if(strcmp(etudiants[i].departement, "chimie")  == 0 && etudiants[i].note_generale >= 10){
+        if(comparer_sans_casse(etudiants[i].departement, "chimie")  == 0 && etudiants[i].note_generale >= 10){
             nombre_chimie++;
         }
-        if(strcmp(etudiants[i].departement, "informatique")  == 0 && etudiants[i].note_generale >= 10){
+        if(comparer_sans_casse(etudiants[i].departement, "informatique")  == 0 && etudiants[i].note_generale >= 10){
             nombre_info++;
         }
-        if(strcmp(etudiants[i].departement, "biologie")  == 0 && etudiants[i].note_generale >= 10){
+        if(comparer_sans_casse(etudiants[i].departement, "biologie")  == 0 && etudiants[i].note_generale >= 10){
             nombre_biologie++;
         }
     }
@@ -549,13 +558,12 @@ void rechercher_un_etudiant(){
     scanf("%d", &choix);
     if(choix == 1){
         char nom_saisez[50];
-        char nom_saisez_converter[50];
         printf("Sasiez Le Nom: ");
-        scanf("%s", &nom_saisez);
-        strcpy(nom_saisez_converter, strlwr(nom_saisez));
+        scanf("%49s", nom_saisez);
+
         for (int i = 0; i < nombre_etudiants; i++){
-            strcpy(etudiants[i].nom, strlwr(etudiants[i].nom));
-            if(strcmp(etudiants[i].nom, nom_saisez_converter)== 0){
+
+            if(comparer_sans_casse(etudiants[i].nom, nom_saisez)== 0){
                 printf("\n");
                 printf("ID: %d\n", etudiants[i].id);
                 printf("Nom: %s\n", etudiants[i].nom);
@@ -568,13 +576,13 @@ void rechercher_un_etudiant(){
     }else if(choix == 2){
         char choix_departement[50];
         printf("Saisez Le departement: ");
-        scanf("%s", &choix_departement);
-        strcpy(choix_departement, strlwr(choix_departement));
+        scanf("%49s", choix_departement);
+
         
 
         for(int i = 0; i < nombre_etudiants; i++){
-            strcpy(etudiants[i].departement, strlwr(etudiants[i].departement));
-            if( strcmp(choix_departement, etudiants[i].departement) == 0){
+
+            if( comparer_sans_casse(choix_departement, etudiants[i].departement) == 0){
                 printf("\n");
                 printf("ID: %d\n", etudiants[i].id);
                 printf("Nom: %s\n", etudiants[i].nom);
@@ -590,65 +598,42 @@ void rechercher_un_etudiant(){
 
 void triage(){
     int choix;
-    printf("Trier par:\n1. Nom (A-Z)\n2. Nom (Z-A)\n3. Note generale (croissant)\n4. Note generale (decroissant)\n5. Statut de reussite\n");
+    printf("Trier par:\n1. Nom (A-Z)\n2. Nom (Z-A)\n");
     printf("Votre Choix: ");
     scanf("%d", &choix);
     switch(choix){
         case 1:
-           trier_etudtiant_fct_nom1();
+           afficher_tri_par_nom(0);
            break;
         case 2:
-           trier_etudiant_fct_nom2();
+           afficher_tri_par_nom(1);
            break;
     }
 }
 
-void trier_etudtiant_fct_nom1(){
-    for (int i = 0; i < nombre_etudiants; i++){
-        strcpy(etudiants[i].nom, strlwr(etudiants[i].nom));
-    }
-   for (int i = 0; i < nombre_etudiants; i++) {
-                for (int j = i + 1; j < nombre_etudiants; j++) {
-                    if (strcmp(etudiants[i].nom, etudiants[j].nom) > 0) {
-                        Etudiant change = etudiants[i];
-                        etudiants[i] = etudiants[j];
-                        etudiants[j] = change;
-                    }
-                }
-            }
-            printf("\nListe des etudiants tries par nom (A-Z):\n");
-            for (int i = 0; i < nombre_etudiants; i++) {
-                printf("ID: %d\n", etudiants[i].id);
-                printf("Nom: %s\n", etudiants[i].nom);
-                printf("Prenom: %s\n", etudiants[i].prenom);
-                printf("Date de naissance: %d-%d-%d\n", etudiants[i].date_de_naissances.jour, etudiants[i].date_de_naissances.mois, etudiants[i].date_de_naissances.annee);
-                printf("Departement: %s\n", etudiants[i].departement);
-                printf("Note generale: %.2f\n", etudiants[i].note_generale);
-                printf("\n");
-            }
-}
+static void afficher_tri_par_nom(int descendant) {
+    int positions[MAX_ETUDIANTS];
+    for (int i = 0; i < nombre_etudiants; i++) positions[i] = i;
 
-// void trier_etudiant_fct_nom2(){
-//     for (int i = 0; i < nombre_etudiants; i++){
-//         strcpy(etudiants[i].nom, strlwr(etudiants[i].nom));
-//     }
-//    for (int i = 0; i < nombre_etudiants; i++) {
-//                 for (int j = i + 1; j < nombre_etudiants; j++) {
-//                     if (strcmp(etudiants[i].nom, etudiants[j].nom) > 0) {
-//                         Etudiant change = etudiants[j];
-//                         etudiants[j] = etudiants[i];
-//                         etudiants[i] = change;
-//                     }
-//                 }
-//             }
-//             printf("\nListe des etudiants tries par nom (A-Z):\n");
-//             for (int i = 0; i < nombre_etudiants; i++) {
-//                 printf("ID: %d\n", etudiants[i].id);
-//                 printf("Nom: %s\n", etudiants[i].nom);
-//                 printf("Prenom: %s\n", etudiants[i].prenom);
-//                 printf("Date de naissance: %d-%d-%d\n", etudiants[i].date_de_naissances.jour, etudiants[i].date_de_naissances.mois, etudiants[i].date_de_naissances.annee);
-//                 printf("Departement: %s\n", etudiants[i].departement);
-//                 printf("Note generale: %.2f\n", etudiants[i].note_generale);
-//                 printf("\n");
-//             }
-// }
+    for (int i = 1; i < nombre_etudiants; i++) {
+        int position = positions[i];
+        int j = i;
+        while (j > 0) {
+            int comparaison = comparer_sans_casse(etudiants[positions[j - 1]].nom,
+                                                   etudiants[position].nom);
+            if (descendant ? comparaison >= 0 : comparaison <= 0) break;
+            positions[j] = positions[j - 1];
+            j--;
+        }
+        positions[j] = position;
+    }
+
+    printf("\nListe des etudiants tries par nom (%s):\n", descendant ? "Z-A" : "A-Z");
+    for (int i = 0; i < nombre_etudiants; i++) {
+        const Etudiant *e = &etudiants[positions[i]];
+        printf("ID: %d\nNom: %s\nPrenom: %s\n", e->id, e->nom, e->prenom);
+        printf("Date de naissance: %d-%d-%d\n", e->date_de_naissances.jour,
+               e->date_de_naissances.mois, e->date_de_naissances.annee);
+        printf("Departement: %s\nNote generale: %.2f\n\n", e->departement, e->note_generale);
+    }
+}
